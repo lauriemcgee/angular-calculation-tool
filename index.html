@@ -6,10 +6,9 @@
   <title>Calculation Tool</title>
   <script type="text/javascript" src="bundle.js"></script>
 </head>
-<body>
-<div id="myCalculator">
+<body ng-app="myApp">
+<div id="myCalculator" ng-controller="calculatorController">
   <main>
-
     <section class="inc">
       <div>
         <h4>Incandescent</h4>
@@ -45,9 +44,7 @@
     <div>
       <h4>Lumens</h4>
       <p>Brightness of <br>Bulb</p>
-      <select>
-        <option value="600">600</option>
-        <option value="900">900</option>
+      <select ng-model="current_lumens" ng-options="lumen_option as lumen_option for lumen_option in lumen_options">
       </select>
     </div>
     <div>
