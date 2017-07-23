@@ -17,7 +17,21 @@ myApp.controller('calculatorController', function($scope) {
 
   vm.calculate = function() {
     
-    
+    vm.inc_wattage = (vm.current_lumens * vm.inc_conversion).toFixed(1);
+    vm.hal_wattage = (vm.current_lumens * vm.hal_conversion).toFixed(1);
+    vm.cfl_wattage = (vm.current_lumens * vm.cfl_conversion).toFixed(1);
+    vm.led_wattage = (vm.current_lumens * vm.led_conversion).toFixed(1);
+
+    if ( vm.current_hours > 24) { vm.current_hours = 24; }
+
+    var total_hours = vm.total_days * vm.current_hours;
+    var cost = vm.current_cost / 100;
+
+    vm.inc_cost = (((vm.inc_wattage * total_hours) / 1000) * cost).toFixed(2);
+    vm.hal_cost = (((vm.hal_wattage * total_hours) / 1000) * cost).toFixed(2);
+    vm.cfl_cost = (((vm.cfl_wattage * total_hours) / 1000) * cost).toFixed(2);
+    vm.led_cost = (((vm.led_wattage * total_hours) / 1000) * cost).toFixed(2);
+
   };
 
   vm.calculate();

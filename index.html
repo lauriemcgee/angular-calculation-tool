@@ -12,29 +12,29 @@
     <section class="inc">
       <div>
         <h4>Incandescent</h4>
-        <p>100.0</p>
-        <p>13.14</p>
+        <p>{{ inc_wattage }}</p>
+        <p>{{ inc_cost }}</p>
       </div>
     </section>
     <section class="hal">
       <div>
         <h4>Halogen</h4>
-        <p>72.0</p>
-        <p>9.46</p>
+        <p>{{ hal_wattage}}</p>
+        <p>{{ hal_cost }}</p>
       </div>
     </section>
     <section class="cfl">
       <div>
         <h4>CFL</h4>
-        <p>23.4</p>
-        <p>3.07</p>
+        <p>{{ cfl_wattage }}</p>
+        <p>{{ cfl_cost }}</p>
       </div>
     </section>
     <section class="led">
       <div>
         <h4>LED</h4>
-        <p>20.0</p>
-        <p>2.63</p>
+        <p>{{ led_wattage }}</p>
+        <p>{{ led_cost }}</p>
       </div>
     </section>
 
@@ -44,18 +44,18 @@
     <div>
       <h4>Lumens</h4>
       <p>Brightness of <br>Bulb</p>
-      <select ng-model="current_lumens" ng-options="lumen_option as lumen_option for lumen_option in lumen_options">
+      <select ng-change="calculate()" ng-model="current_lumens" ng-options="lumen_option as lumen_option for lumen_option in lumen_options">
       </select>
     </div>
     <div>
       <h4>KWh</h4>
       <p>Kilowatt-<br>hour cost</p>
-      <input type="number" ng-model="current_cost" value="{{ current_cost }}"> cents
+      <input type="number" ng-change="calculate()" ng-model="current_cost" value="{{ current_cost }}"> cents
     </div>
     <div>
       <h4>Hours</h4>
       <p>Usage <br>per day</p>
-      <input type="number" ng-model="current_hours" value="{{ current_hours }}">
+      <input type="number" ng-change="calculate()" ng-model="current_hours" value="{{ current_hours }}">
     </div>
   </form>
 
