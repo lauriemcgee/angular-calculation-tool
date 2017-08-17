@@ -15,18 +15,21 @@ myApp.controller('calculatorController', function($scope) {
   vm.cfl_conversion = .0146;
   vm.led_conversion = .0125;
 
-  function calculateWattage(conversion) {
-    return (vm.current_lumens * conversion).toFixed(1);
+  function convertLumensToWattage(lumens) {
+    return function(conversion) {
+      return (lumens * conversion).toFixed(1);
+    }
   }
 
   vm.calculate = function() {
-    
-    vm.inc_wattage = calculateWattage(inc_conversion);
-    vm.hal_wattage = calculateWattage(hal_conversion);
-    vm.cfl_wattage = calculateWattage(cfl_conversion);
-    vm.led_wattage = calculateWattage(led_conversion);
+    var calculateWattage = convertLumensToWattage(vm.current_lumens);
 
-    if ( vm.current_hours > 24) { vm.current_hours = 24; }
+    vm.inc_wattage = calculateWattage(vm.inc_conversion);
+    vm.hal_wattage = calculateWattage(vm.hal_conversion);
+    vm.cfl_wattage = calculateWattage(vm.cfl_conversion);
+    vm.led_wattage = calculateWattage(vm.led_conversion);
+
+    if (vm.current_hours > 24) { vm.current_hours = 24; }
 
     var total_hours = vm.total_days * vm.current_hours;
     var cost = vm.current_cost / 100;
