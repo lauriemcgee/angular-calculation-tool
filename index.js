@@ -9,6 +9,12 @@ myApp.controller('calculatorController', function($scope) {
   vm.current_hours = 3;
   vm.total_days = 365;
 
+  var conversions = {
+    inc: .0625,
+    hal: .0450,
+    cfl: .0146,
+    led: .0125,
+  }
 
   vm.inc_conversion = .0625;
   vm.hal_conversion = .0450;
@@ -31,13 +37,22 @@ myApp.controller('calculatorController', function($scope) {
     }
   }
 
-  vm.calculate = function() {
-    var calculateWattage = convertLumensToWattage(vm.current_lumens);
+  function calculateWattages(lumens) {
+    var calculateWattage = convertLumensToWattage(lumens);
+    var wattages = {};
+    
+    for (var key in conversions) {
+      var conversion = conversions[key];
+      wattages[key + "_wattage"] = calculateWattage(conversion);
+    }
 
-    vm.inc_wattage = calculateWattage(vm.inc_conversion);
-    vm.hal_wattage = calculateWattage(vm.hal_conversion);
-    vm.cfl_wattage = calculateWattage(vm.cfl_conversion);
-    vm.led_wattage = calculateWattage(vm.led_conversion);
+    return wattages;
+  }
+
+  vm.calculate = function() {
+    var wattages = calculateWattages(vm.current_lumens);
+    
+    Object.assign(vm, wattages);
 
     if (vm.current_hours > 24) {
       vm.current_hours = 24;
