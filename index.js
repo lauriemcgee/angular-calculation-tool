@@ -21,6 +21,16 @@ myApp.controller('calculatorController', function($scope) {
     }
   }
 
+  function calculateCost(hours, currentCost) {
+    var totalDays = 365;
+    var totalHours = totalDays * hours;
+    var cost = currentCost / 100;
+
+    return function(wattage) {
+      return (wattage * totalHours / 1000 * cost).toFixed(2);
+    }
+  }
+
   vm.calculate = function() {
     var calculateWattage = convertLumensToWattage(vm.current_lumens);
 
@@ -29,16 +39,16 @@ myApp.controller('calculatorController', function($scope) {
     vm.cfl_wattage = calculateWattage(vm.cfl_conversion);
     vm.led_wattage = calculateWattage(vm.led_conversion);
 
-    if (vm.current_hours > 24) { vm.current_hours = 24; }
+    if (vm.current_hours > 24) {
+      vm.current_hours = 24;
+    }
 
-    var total_hours = vm.total_days * vm.current_hours;
-    var cost = vm.current_cost / 100;
+    var calculateWattageCost = calculateCost(vm.current_hours, vm.current_cost);
 
-    vm.inc_cost = (((vm.inc_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.hal_cost = (((vm.hal_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.cfl_cost = (((vm.cfl_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.led_cost = (((vm.led_wattage * total_hours) / 1000) * cost).toFixed(2);
-
+    vm.inc_cost = calculateWattageCost(vm.inc_wattage);
+    vm.hal_cost = calculateWattageCost(vm.hal_wattage);
+    vm.cfl_cost = calculateWattageCost(vm.cfl_wattage);
+    vm.led_cost = calculateWattageCost(vm.led_wattage);
   };
 
   vm.calculate();
