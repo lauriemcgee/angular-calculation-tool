@@ -16,24 +16,9 @@ myApp.controller('calculatorController', function($scope) {
     led: .0125,
   }
 
-  vm.inc_conversion = .0625;
-  vm.hal_conversion = .0450;
-  vm.cfl_conversion = .0146;
-  vm.led_conversion = .0125;
-
   function convertLumensToWattage(lumens) {
     return function(conversion) {
       return (lumens * conversion).toFixed(1);
-    }
-  }
-
-  function calculateCost(hours, currentCost) {
-    var totalDays = 365;
-    var totalHours = totalDays * hours;
-    var cost = currentCost / 100;
-
-    return function(wattage) {
-      return (wattage * totalHours / 1000 * cost).toFixed(2);
     }
   }
 
@@ -49,21 +34,39 @@ myApp.controller('calculatorController', function($scope) {
     return wattages;
   }
 
-  vm.calculate = function() {
-    var wattages = calculateWattages(vm.current_lumens);
-    
-    Object.assign(vm, wattages);
+  function calculateCost(hours, currentCost) {
+    var totalDays = 365;
+    var totalHours = totalDays * hours;
+    var cost = currentCost / 100;
 
+    return function(wattage) {
+      return (wattage * totalHours / 1000 * cost).toFixed(2);
+    }
+  }
+
+  function calculateWattageCosts(wattages, hours, cost) {
+    var calculateWattageCost = calculateCost(hours, cost);
+    var costs = {};
+
+    for (var key in wattages) {
+      var wattage = wattages[key];
+      key = key.slice(0, key.indexOf("_"));
+      costs[key + "_cost"] = calculateWattageCost(wattage);
+    }
+
+    return costs;
+  }
+
+  vm.calculate = function() {
     if (vm.current_hours > 24) {
       vm.current_hours = 24;
     }
 
-    var calculateWattageCost = calculateCost(vm.current_hours, vm.current_cost);
-
-    vm.inc_cost = calculateWattageCost(vm.inc_wattage);
-    vm.hal_cost = calculateWattageCost(vm.hal_wattage);
-    vm.cfl_cost = calculateWattageCost(vm.cfl_wattage);
-    vm.led_cost = calculateWattageCost(vm.led_wattage);
+    var wattages = calculateWattages(vm.current_lumens);
+    var costs = calculateWattageCosts(wattages ,vm.current_hours, vm.current_cost);
+    
+    Object.assign(vm, wattages);
+    Object.assign(vm, costs);
   };
 
   vm.calculate();
