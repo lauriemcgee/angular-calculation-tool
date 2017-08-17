@@ -9,29 +9,64 @@ myApp.controller('calculatorController', function($scope) {
   vm.current_hours = 3;
   vm.total_days = 365;
 
+  var conversions = {
+    inc: .0625,
+    hal: .0450,
+    cfl: .0146,
+    led: .0125,
+  }
 
-  vm.inc_conversion = .0625;
-  vm.hal_conversion = .0450;
-  vm.cfl_conversion = .0146;
-  vm.led_conversion = .0125;
+  function convertLumensToWattage(lumens) {
+    return function(conversion) {
+      return (lumens * conversion).toFixed(1);
+    }
+  }
+
+  function calculateWattages(lumens) {
+    var calculateWattage = convertLumensToWattage(lumens);
+    var wattages = {};
+    
+    for (var key in conversions) {
+      var conversion = conversions[key];
+      wattages[key + "_wattage"] = calculateWattage(conversion);
+    }
+
+    return wattages;
+  }
+
+  function calculateCost(hours, currentCost) {
+    var totalDays = 365;
+    var totalHours = totalDays * hours;
+    var cost = currentCost / 100;
+
+    return function(wattage) {
+      return (wattage * totalHours / 1000 * cost).toFixed(2);
+    }
+  }
+
+  function calculateWattageCosts(wattages, hours, cost) {
+    var calculateWattageCost = calculateCost(hours, cost);
+    var costs = {};
+
+    for (var key in wattages) {
+      var wattage = wattages[key];
+      key = key.slice(0, key.indexOf("_"));
+      costs[key + "_cost"] = calculateWattageCost(wattage);
+    }
+
+    return costs;
+  }
 
   vm.calculate = function() {
+    if (vm.current_hours > 24) {
+      vm.current_hours = 24;
+    }
+
+    var wattages = calculateWattages(vm.current_lumens);
+    var costs = calculateWattageCosts(wattages ,vm.current_hours, vm.current_cost);
     
-    vm.inc_wattage = (vm.current_lumens * vm.inc_conversion).toFixed(1);
-    vm.hal_wattage = (vm.current_lumens * vm.hal_conversion).toFixed(1);
-    vm.cfl_wattage = (vm.current_lumens * vm.cfl_conversion).toFixed(1);
-    vm.led_wattage = (vm.current_lumens * vm.led_conversion).toFixed(1);
-
-    if ( vm.current_hours > 24) { vm.current_hours = 24; }
-
-    var total_hours = vm.total_days * vm.current_hours;
-    var cost = vm.current_cost / 100;
-
-    vm.inc_cost = (((vm.inc_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.hal_cost = (((vm.hal_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.cfl_cost = (((vm.cfl_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.led_cost = (((vm.led_wattage * total_hours) / 1000) * cost).toFixed(2);
-
+    Object.assign(vm, wattages);
+    Object.assign(vm, costs);
   };
 
   vm.calculate();
