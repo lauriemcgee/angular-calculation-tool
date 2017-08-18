@@ -9,29 +9,29 @@ myApp.controller('calculatorController', function($scope) {
   vm.current_hours = 3;
   vm.total_days = 365;
 
-  var conversions = {
-    inc: .0625,
-    hal: .0450,
-    cfl: .0146,
-    led: .0125,
+  vm.bulbStats = {
+    inc: {
+      name: "Incandescent",
+      conversion: .0625,
+    },
+    hal: {
+      name: "Halogen",
+      conversion: .0450,
+    },
+    cfl: {
+      name: "CFL",
+      conversion: .0146,
+    },
+    led: {
+      name: "LED",
+      conversion: .0125,
+    }
   }
 
   function convertLumensToWattage(lumens) {
     return function(conversion) {
-      return (lumens * conversion).toFixed(1);
+      return lumens * conversion;
     }
-  }
-
-  function calculateWattages(lumens) {
-    var calculateWattage = convertLumensToWattage(lumens);
-    var wattages = {};
-    
-    for (var key in conversions) {
-      var conversion = conversions[key];
-      wattages[key + "_wattage"] = calculateWattage(conversion);
-    }
-
-    return wattages;
   }
 
   function calculateCost(hours, currentCost) {
@@ -40,33 +40,42 @@ myApp.controller('calculatorController', function($scope) {
     var cost = currentCost / 100;
 
     return function(wattage) {
-      return (wattage * totalHours / 1000 * cost).toFixed(2);
+      return (wattage * totalHours / 1000 * cost);
     }
   }
 
-  function calculateWattageCosts(wattages, hours, cost) {
-    var calculateWattageCost = calculateCost(hours, cost);
-    var costs = {};
+  function calcBulbStat(conversion, calcWattage, calcCostFromWattage) {
+    var wattage = calcWattage(conversion);
+    var cost = calcCostFromWattage(wattage);
 
-    for (var key in wattages) {
-      var wattage = wattages[key];
-      key = key.slice(0, key.indexOf("_"));
-      costs[key + "_cost"] = calculateWattageCost(wattage);
+    return {
+      wattage: wattage.toFixed(1),
+      cost: cost.toFixed(2)
     }
-
-    return costs;
   }
+
+  function calcBulbStats(bulbStats) {
+    return function (lumens, hours, cost) {
+      for (var key in bulbStats) {
+        var calcWattage = convertLumensToWattage(lumens);
+        var calcCostFromWattage = calculateCost(hours, cost);
+  
+        var result = calcBulbStat(bulbStats[key].conversion, calcWattage, calcCostFromWattage);
+
+        bulbStats[key].wattage = result.wattage;
+        bulbStats[key].cost = result.cost;
+      }
+    }
+  }
+
+  var updateBulbStats = calcBulbStats(vm.bulbStats);
 
   vm.calculate = function() {
     if (vm.current_hours > 24) {
       vm.current_hours = 24;
     }
-
-    var wattages = calculateWattages(vm.current_lumens);
-    var costs = calculateWattageCosts(wattages ,vm.current_hours, vm.current_cost);
     
-    Object.assign(vm, wattages);
-    Object.assign(vm, costs);
+    updateBulbStats(vm.current_lumens, vm.current_hours, vm.current_cost);    
   };
 
   vm.calculate();
