@@ -9,29 +9,73 @@ myApp.controller('calculatorController', function($scope) {
   vm.current_hours = 3;
   vm.total_days = 365;
 
+  vm.bulbStats = {
+    inc: {
+      name: "Incandescent",
+      conversion: .0625,
+    },
+    hal: {
+      name: "Halogen",
+      conversion: .0450,
+    },
+    cfl: {
+      name: "CFL",
+      conversion: .0146,
+    },
+    led: {
+      name: "LED",
+      conversion: .0125,
+    }
+  }
 
-  vm.inc_conversion = .0625;
-  vm.hal_conversion = .0450;
-  vm.cfl_conversion = .0146;
-  vm.led_conversion = .0125;
+  function convertLumensToWattage(lumens) {
+    return function(conversion) {
+      return lumens * conversion;
+    }
+  }
+
+  function calculateCost(hours, currentCost) {
+    var totalDays = 365;
+    var totalHours = totalDays * hours;
+    var cost = currentCost / 100;
+
+    return function(wattage) {
+      return (wattage * totalHours / 1000 * cost);
+    }
+  }
+
+  function calcBulbStat(conversion, calcWattage, calcCostFromWattage) {
+    var wattage = calcWattage(conversion);
+    var cost = calcCostFromWattage(wattage);
+
+    return {
+      wattage: wattage.toFixed(1),
+      cost: cost.toFixed(2)
+    }
+  }
+
+  function calcBulbStats(bulbStats) {
+    return function (lumens, hours, cost) {
+      for (var key in bulbStats) {
+        var calcWattage = convertLumensToWattage(lumens);
+        var calcCostFromWattage = calculateCost(hours, cost);
+  
+        var result = calcBulbStat(bulbStats[key].conversion, calcWattage, calcCostFromWattage);
+
+        bulbStats[key].wattage = result.wattage;
+        bulbStats[key].cost = result.cost;
+      }
+    }
+  }
+
+  var updateBulbStats = calcBulbStats(vm.bulbStats);
 
   vm.calculate = function() {
+    if (vm.current_hours > 24) {
+      vm.current_hours = 24;
+    }
     
-    vm.inc_wattage = (vm.current_lumens * vm.inc_conversion).toFixed(1);
-    vm.hal_wattage = (vm.current_lumens * vm.hal_conversion).toFixed(1);
-    vm.cfl_wattage = (vm.current_lumens * vm.cfl_conversion).toFixed(1);
-    vm.led_wattage = (vm.current_lumens * vm.led_conversion).toFixed(1);
-
-    if ( vm.current_hours > 24) { vm.current_hours = 24; }
-
-    var total_hours = vm.total_days * vm.current_hours;
-    var cost = vm.current_cost / 100;
-
-    vm.inc_cost = (((vm.inc_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.hal_cost = (((vm.hal_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.cfl_cost = (((vm.cfl_wattage * total_hours) / 1000) * cost).toFixed(2);
-    vm.led_cost = (((vm.led_wattage * total_hours) / 1000) * cost).toFixed(2);
-
+    updateBulbStats(vm.current_lumens, vm.current_hours, vm.current_cost);    
   };
 
   vm.calculate();

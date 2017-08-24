@@ -8,36 +8,15 @@
 </head>
 <body ng-app="myApp">
 <div id="myCalculator" ng-controller="calculatorController">
+  
   <main>
-    <section class="inc">
+    <section ng-repeat="(bulb, bulbStat) in bulbStats" ng-class="bulb">
       <div>
-        <h4>Incandescent</h4>
-        <p>{{ inc_wattage }}</p>
-        <p>{{ inc_cost }}</p>
+        <h4>{{ bulbStat.name }}</h4>
+        <p>{{ bulbStat.wattage }}</p>
+        <p>{{ bulbStat.cost }}</p>
       </div>
     </section>
-    <section class="hal">
-      <div>
-        <h4>Halogen</h4>
-        <p>{{ hal_wattage}}</p>
-        <p>{{ hal_cost }}</p>
-      </div>
-    </section>
-    <section class="cfl">
-      <div>
-        <h4>CFL</h4>
-        <p>{{ cfl_wattage }}</p>
-        <p>{{ cfl_cost }}</p>
-      </div>
-    </section>
-    <section class="led">
-      <div>
-        <h4>LED</h4>
-        <p>{{ led_wattage }}</p>
-        <p>{{ led_cost }}</p>
-      </div>
-    </section>
-
   </main>
 
   <form>
